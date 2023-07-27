@@ -27,7 +27,7 @@ int main()
 	cin >> lowerBound;
 	cout << "And what shall be your upper bound?" << endl;
 	cin >> upperBound;
-	cout << "Finally, how many generation do you want?" << endl;
+	cout << "Finally, how many generations do you want?" << endl;
 	cin >> numOfGenerations;
 	/* Note: If the lower bound provided is lower than the search value, it is not possible to find.
 	* There are multiple ways to handle such a problem
@@ -53,7 +53,7 @@ int main()
 	output.open("output.txt");
 	srand(time(NULL)); // helps to make an even more truly random number generator
 	cout << "Generating..." << endl;
-	for (int i = 0; i < numOfGenerations; i++)
+	for (int i = 1; i <= numOfGenerations; i++) // i set to 1 so generations can be cut into lines of 10 
 	{
 		
 		cur = rand() % (upperBound - lowerBound + 1) + lowerBound; // This is still imperfect; it apparently favors lower numbers
@@ -61,10 +61,17 @@ int main()
 		{
 			occurrances++;
 		}
-		cout << cur << endl;
-		output << cur << endl;
+		cout << cur << " ";
+		output << cur << " ";
+		if (i % 10 == 0)
+		{
+			cout << endl;
+			output << endl;
+		}
 	}
+	cout << endl;
 	cout << "There were: " << occurrances << " occurrances of " << search;
+	
 	output.close();
 
 
