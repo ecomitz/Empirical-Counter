@@ -1,11 +1,11 @@
-#include <iostream>
-#include <iomanip>
 #include <fstream>
 #include <time.h> // used for the pursuit of an even more perfect random
-#include <string>
 #include <chrono> // used to create clocks for file names
 #include <sstream> // used to create file names from clock details
-
+#include <vector>
+#include <iostream>
+#include <iomanip>
+#include <string>
 
 
 
@@ -20,6 +20,31 @@
 
 using namespace std;
 
+// Prints commandline options
+void printHelp()
+{
+	std::cout << "-help: Prints info about the possible commands. "
+		<< "For args with \"=val\", the default is that the user is prompted for it, except stated otherwise. \n" << std::endl;
+	std::cout << "-nogui: bool for whether or not the program should run as a GUI (General User Interface). NYI \n" << std::endl;
+	std::cout << "-lowerbound=val: Sets the lowerbound for the program. E.g: -lowerbound=4 \n" << std::endl;
+	std::cout << "-upperbound=val: Sets the upperbound for the program. E.g: -upperbound=10 \n" << std::endl;
+	std::cout << "-numgenerations=val: Sets the amount of generations for the program. E.g: -numgenerations=100 \n" << std::endl;
+	std::cout << "-search=val: Sets the value desired for counting in the program. E.g -search=6 \n" << std::endl;
+	std::cout << "-outputpath=val: Sets the location of where the output file will go. By default, this is the same folder as the program. NYI \n" << std::endl;
+	std::cout << "-debug: Prints useful debugging info for fixing this program. \n" << std::endl;
+}
+
+
+void printDebugInfo(int argc, char* argv[])
+{
+	cout << "Parameters used: " << endl;
+	for (int i = 0; i < argc; i++)
+	{
+		cout << i << ": " << argv[i] << endl;
+	}
+
+
+}
 
 // Helps to construct the output file's name
 void flagHelper(stringstream& builder, string& outputName)
@@ -29,32 +54,127 @@ void flagHelper(stringstream& builder, string& outputName)
 	builder << resetiosflags;
 	builder.str("");
 }
-
-
-int main()
+const unsigned char SWITCH_COUNT = 8; // The amount of possibly used commandline options
+enum COMMAND_LINE_OPTIONS { HELP, NOGUI, LOWERBOUND, UPPERBOUND, NUMGENERATIONS, SEARCH, OUTPUTPATH, DEBUG };
+int main(int argc, char* argv[])
 {
-	// The variables of the program
+
+
+
+	// The variables of the program. Pre initialized to avoid warnings
+
+	bool* switches = new bool[SWITCH_COUNT]; // used to determine whether or not commandline args were used. See readme for numbering
 	ofstream output;
-	int search; // The value of which occurrances we are interested in counting
-	int lowerBound; 
-	int upperBound;
+	int search = 5; // The value of which occurrances we are interested in counting
+	int lowerBound = 0;
+	int upperBound = 10;
 	unsigned int occurrances = 0; // The amount of times search occurred in generation. Set to zero initially because no instances have occurred yet empirically. 
-	int cur; // When we loop the generator, this will refer to the number being currently generated.
-	int numOfGenerations;
+	int cur = 0; // When we loop the generator, this will refer to the number being currently generated.
+	int numOfGenerations = 100;
+	vector<string> args;
+	//----------------------------------------------------------------------------------------------------------------------------------------
+		// Switch reading section
 
-//----------------------------------------------------------------------------------------------------------------------------------------
-	// Section for settings of generation
-	// Step 1: Ask for settings
-	// Step 2: Check settings for validity
+		// Step 1: Set default values for switches
+		// Step 2: Read the passed arguments
+		// Step 3: Parse the passed arguments
+		// Step 3a: Turn on the switches from the arguments
+		// Step 3b: Process the data from arguments with data
 
-	cout << "What number are you interested in counting the occurances of?" << endl;
-	cin >> search;
-	cout << "And what shall be your lower bound?" << endl;
-	cin >> lowerBound;
-	cout << "And what shall be your upper bound?" << endl;
-	cin >> upperBound;
-	cout << "Finally, how many generations do you want?" << endl;
-	cin >> numOfGenerations;
+	for (unsigned char i = 0; i < SWITCH_COUNT; i++)
+	{
+		switches[i] = false;
+	}
+
+
+	for (int i = 0; i < argc; i++)
+	{
+		args.push_back(argv[i]);
+	}
+
+
+	for (const string& arg : args)
+	{
+		string val = "";
+		if (arg == "-help" && switches[HELP] == false)
+		{
+			printHelp();
+			switches[HELP] = true;
+			return 0;
+		}
+
+		if (arg.rfind("-nogui", 0) == 0)
+		{
+			switches[NOGUI] = true;
+		}
+		if (arg.rfind("-lowerbound=", 0) == 0)
+		{
+			switches[LOWERBOUND] = true;
+			val = arg.substr(12);
+			lowerBound = stoi(val);
+		}
+		if (arg.rfind("-upperbound=", 0) == 0)
+		{
+			switches[UPPERBOUND] = true;
+			val = arg.substr(12);
+			upperBound = stoi(val);
+		}
+		if (arg.rfind("-numgenerations=", 0) == 0)
+		{
+			switches[NUMGENERATIONS] = true;
+			val = arg.substr(16);
+			numOfGenerations = stoi(val);
+		}
+		if (arg.rfind("-search=", 0) == 0)
+		{
+			switches[SEARCH] = true;
+			val = arg.substr(8);
+			search = stoi(val);
+
+		}
+		if (arg.rfind("-outputpath", 0) == 0)
+		{
+			switches[OUTPUTPATH] = true;
+		}
+		if (arg == "-debug")
+		{
+			switches[DEBUG] = true;
+			printDebugInfo(argc, argv);
+		}
+
+	}
+
+
+
+
+
+
+
+
+	//----------------------------------------------------------------------------------------------------------------------------------------
+		// Section for settings of generation
+		// Step 1: Ask for settings
+		// Step 2: Check settings for validity
+	if (switches[SEARCH] == false)
+	{
+		cout << "What number are you interested in counting the occurances of?" << endl;
+		cin >> search;
+	}
+	if (switches[LOWERBOUND] == false)
+	{
+		cout << "And what shall be your lower bound?" << endl;
+		cin >> lowerBound;
+	}
+	if (switches[UPPERBOUND] == false)
+	{
+		cout << "And what shall be your upper bound?" << endl;
+		cin >> upperBound;
+	}
+	if (switches[NUMGENERATIONS] == false)
+	{
+		cout << "Finally, how many generations do you want?" << endl;
+		cin >> numOfGenerations;
+	}
 
 	// Section for incase lowerBound or upperBound is greater than search target
 	while (search < lowerBound || search > upperBound)
@@ -109,7 +229,7 @@ int main()
 	output << "Upper bound: " << upperBound << endl;
 	output << "Number of generations: " << numOfGenerations << endl;
 	cout << "Generating..." << endl;
-	for (int i = 1; i <= numOfGenerations; i++) // i set to 1 so generations can be cut into lines of 10 
+	for (unsigned int i = 1; i <= numOfGenerations; i++) // i set to 1 so generations can be cut into lines of 10 
 	{
 		
 		cur = rand() % (upperBound - lowerBound + 1) + lowerBound; 
